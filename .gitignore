@@ -1,0 +1,18 @@
+# Cookiecutter
+.cookiecutter_replay.json
+
+# Generated outputs (when testing locally)
+out/
+generated/
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Local
+.local/

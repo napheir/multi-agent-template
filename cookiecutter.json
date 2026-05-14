@@ -1,0 +1,19 @@
+{
+  "project_name": "my-project",
+  "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-')|replace('_', '-') }}",
+  "description": "A multi-agent Claude Code project bootstrapped via multi-agent-template",
+  "agents": "core,data",
+  "core_agent_name": "core",
+  "ritual_phrase": "Acknowledged",
+  "install_root": "~/workshop-claude",
+  "python_version": "3.11",
+  "_extensions": [],
+  "__prompts__": {
+    "project_name": "Project name (used as directory name under install_root)",
+    "agents": "Comma-separated agent list (core first; default: core,data)",
+    "core_agent_name": "Name of the management/governance agent (default: core)",
+    "ritual_phrase": "Session-start ritual phrase (default: Acknowledged)",
+    "install_root": "Install root directory (default: ~/workshop-claude)",
+    "python_version": "Python version for venvs (default: 3.11)"
+  }
+}
