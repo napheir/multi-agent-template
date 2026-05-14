@@ -90,21 +90,61 @@ def cmd_new(args: argparse.Namespace) -> int:
         print("[mab] --no-bootstrap given; skipping bootstrap script + governance-core install.")
         return 0
 
-    # Run the bootstrap script (PowerShell on Windows, bash elsewhere)
-    if platform.system() == "Windows":
-        script = template_root / "scripts" / "bootstrap.ps1"
-        cmd = ["powershell", "-NoProfile", "-File", str(script),
-               "-ProjectRoot", str(project_dir),
-               "-Agents", args.agents,
-               "-RitualPhrase", args.ritual_phrase]
-    else:
-        script = template_root / "scripts" / "bootstrap.sh"
-        cmd = ["bash", str(script), str(project_dir), args.agents, args.ritual_phrase]
-    print(f"[mab] Running: {' '.join(cmd)}")
-    r = subprocess.run(cmd)
+    # Bootstrap directly via Python (avoid PowerShell native JSON quoting issues
+    # on Windows; the historic bootstrap.{ps1,sh} scripts are kept for power
+    # users but are not invoked by the standard `new` flow). Steps:
+    #   1. git init in project_dir if not already a repo
+    #   2. Build config_overrides JSON in Python
+    #   3. Call `governance-core install --config-overrides <JSON>` via subprocess.run
+    #   4. git add + commit (initial)
+    import json as _json
+    git_dir = project_dir / ".git"
+    if not git_dir.exists():
+        subprocess.run(["git", "init", "-b", "master"], cwd=project_dir, check=True,
+                       capture_output=True)
+        print("[mab] git init")
+
+    agents_list = [a.strip() for a in args.agents.split(",") if a.strip()]
+    agents_cfg = []
+    for a in agents_list:
+        branch = "master" if a == args.core_agent_name else f"feature/{a}"
+        agents_cfg.append({"name": a, "branch": branch, "clone_dir": f"agent-{a}"})
+
+    install_root = Path(args.install_root).expanduser().resolve()
+    overrides = {
+        "project_name": args.project_name,
+        "install_root": str(install_root),
+        "shared_state_root": str(install_root / "shared_state" / args.project_name),
+        "ritual_phrase": args.ritual_phrase,
+        "core_agent_name": args.core_agent_name,
+        "agents": agents_cfg,
+    }
+    overrides_json = _json.dumps(overrides, ensure_ascii=False)
+    print(f"[mab] Calling governance-core install ...")
+    r = subprocess.run(
+        ["governance-core", "install",
+         "--project-root", str(project_dir),
+         "--config-overrides", overrides_json,
+         "--force"],
+        capture_output=True, text=True, encoding="utf-8",
+    )
     if r.returncode != 0:
-        print(f"[mab] bootstrap script returned {r.returncode}", file=sys.stderr)
+        print(f"[mab] governance-core install failed (rc={r.returncode})", file=sys.stderr)
+        if r.stderr:
+            print(r.stderr, file=sys.stderr)
         return r.returncode
+    print("[mab] governance-core install OK")
+
+    # Initial commit if anything changed
+    st = subprocess.run(["git", "status", "--porcelain"], cwd=project_dir,
+                        capture_output=True, text=True)
+    if st.stdout.strip():
+        subprocess.run(["git", "add", "-A"], cwd=project_dir, check=True,
+                       capture_output=True)
+        subprocess.run(["git", "commit", "-m",
+                        f"chore: bootstrap {args.project_name} via multi-agent-template + governance-core"],
+                       cwd=project_dir, check=True, capture_output=True)
+        print("[mab] Initial commit created")
 
     print(f"[mab] Done.")
     print(f"[mab] Verify with: governance-core doctor --project-root {project_dir}")

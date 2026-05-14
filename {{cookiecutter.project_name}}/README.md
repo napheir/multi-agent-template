@@ -3,7 +3,7 @@
 {{ cookiecutter.description }}
 
 Bootstrapped via [multi-agent-template](https://github.com/...) on
-{{ cookiecutter.__now__ if cookiecutter.__now__ else 'today' }}.
+2026-05-14 (bootstrap date — replace if needed).
 
 ## Agent topology
 
