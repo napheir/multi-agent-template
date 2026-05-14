@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-agent-bootstrap"
+version = "0.1.0a0"
+description = "Cookiecutter-based bootstrap CLI for new multi-agent Claude Code projects (companion to governance-core; P-0059)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "agent-core core agent"},
+]
+keywords = ["claude-code", "multi-agent", "governance", "bootstrap", "cookiecutter"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "cookiecutter>=2.5",
+    "governance-core>=0.1.0a0",
+]
+
+[project.scripts]
+multi-agent-bootstrap = "mab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mab*"]
+
+# Package data: include the cookiecutter template tree
+[tool.setuptools.package-data]
+mab = []
+
+[tool.setuptools]
+# Include the template directory as a data dir (not a package)
+include-package-data = true

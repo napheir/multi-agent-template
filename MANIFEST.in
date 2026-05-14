@@ -1,0 +1,4 @@
+include cookiecutter.json
+recursive-include {{cookiecutter.project_name}} *
+recursive-include scripts *
+recursive-include docs *
