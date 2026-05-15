@@ -26,24 +26,31 @@ This template assumes all your multi-agent projects live under one root:
 
 ## One-time setup (per machine)
 
+### Option A — install from PyPI (recommended)
+
 ```pwsh
-# 1. Create workshop directory
+pip install cookiecutter governance-core multi-agent-bootstrap
+
+# Verify
+governance-core version          # -> governance-core 0.1.0
+multi-agent-bootstrap version    # -> multi-agent-bootstrap 0.1.0
+```
+
+### Option B — install from source (for contributors / latest unreleased)
+
+```pwsh
 mkdir -p ~/workshop-claude
 cd ~/workshop-claude
 
-# 2. Clone both source repos (URLs TBD — Phase 3 doesn't yet publish to GitHub)
-git clone <governance-core-url> governance-core
-git clone <multi-agent-template-url> multi-agent-template
+git clone https://github.com/napheir/governance-core
+git clone https://github.com/napheir/multi-agent-template
 
-# 3. Install governance-core pip package (editable, so upgrades work)
+pip install cookiecutter
 pip install -e ./governance-core
-
-# 4. Install multi-agent-bootstrap CLI from template (editable)
 pip install -e ./multi-agent-template
 
-# 5. Verify
-governance-core version          # -> governance-core 0.1.0a0
-multi-agent-bootstrap version    # -> multi-agent-bootstrap 0.1.0a0
+governance-core version
+multi-agent-bootstrap version
 ```
 
 ## Create a new project (per project, one-shot)
@@ -115,13 +122,14 @@ This setup is portable across machines because:
 | `bootstrap script exits 2 (not implemented)` | Using stale Phase 1.1 scripts | clone latest `multi-agent-template` |
 | `boundary-guard BLOCKED` in Claude session | session started outside project root | open a NEW Claude session from `~/workshop-claude/<project>/agent-core/` |
 
-## Phase 3 status
+## Status
 
-This guide is the Phase 3 (P-0059) deliverable. As of 2026-05-14:
+As of 2026-05-15 (v0.1.0 first public release):
 
-- ✅ governance-core 0.1.0a0 — pip-installable, full CLI
-  (install / upgrade / doctor / render-clauses / version)
-- ✅ multi-agent-template — cookiecutter render + bootstrap scripts
-- ✅ multi-agent-bootstrap 0.1.0a0 CLI — `new <project>` subcommand
-- ⏳ PyPI publication (currently editable-install only)
-- ⏳ GitHub repo URLs (currently local-only)
+- ✅ [governance-core 0.1.0 on PyPI](https://pypi.org/project/governance-core/) —
+  pip-installable, full CLI (install / upgrade / doctor / render-clauses / version)
+- ✅ [multi-agent-bootstrap 0.1.0 on PyPI](https://pypi.org/project/multi-agent-bootstrap/) —
+  `new <project>` subcommand
+- ✅ [github.com/napheir/governance-core](https://github.com/napheir/governance-core) — public
+- ✅ [github.com/napheir/multi-agent-template](https://github.com/napheir/multi-agent-template) — public
+- ⏳ Multi-clone N-agent scaffold (cookiecutter post-gen hook) — planned for 0.2.0
