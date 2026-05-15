@@ -9,4 +9,4 @@ a working multi-agent Claude Code project with one command.
     multi-agent-bootstrap new my-project
 """
 
-__version__ = "0.1.0a0"
+__version__ = "0.1.0"
