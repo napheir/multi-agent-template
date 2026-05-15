@@ -26,7 +26,7 @@ N-clone layout (P-0061):
       agent-<core>/      (master branch)
       agent-<biz-1>/     (feature/<biz-1> branch)
       ...
-    <install-root>/shared_state/<project>/
+    <install-root>/<project>/shared_state/
       proposals/_id_ledger.json
       knowledge/
 """
@@ -113,7 +113,7 @@ def _install_governance_core(project_dir: Path, args) -> int:
     overrides = {
         "project_name": args.project_name,
         "install_root": str(install_root),
-        "shared_state_root": str(install_root / "shared_state" / args.project_name),
+        "shared_state_root": str(install_root / args.project_name / "shared_state"),
         "ritual_phrase": args.ritual_phrase,
         "core_agent_name": args.core_agent_name,
         "agents": agents_cfg,
@@ -170,9 +170,9 @@ def _clone_agents(staging: Path, project_dir: Path, args) -> list[Path]:
 
 
 def _init_shared_state(args) -> Path:
-    """Create shared_state/<project>/ with proposals/_id_ledger.json seed."""
+    """Create <project>/shared_state/ with proposals/_id_ledger.json seed."""
     install_root = Path(os.path.expanduser(args.install_root)).resolve()
-    ss = install_root / "shared_state" / args.project_name
+    ss = install_root / args.project_name / "shared_state"
     (ss / "proposals").mkdir(parents=True, exist_ok=True)
     (ss / "knowledge").mkdir(parents=True, exist_ok=True)
     ledger = ss / "proposals" / "_id_ledger.json"
