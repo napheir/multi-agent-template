@@ -1,42 +1,106 @@
 # multi-agent-template
 
-Cookiecutter template for bootstrapping a new multi-agent Claude Code project
-with governance pre-installed.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Status**: 0.1.0-alpha (P-0059 Phase 1 in-progress, not yet bootstrappable).
+**Cookiecutter template + bootstrap CLI for new multi-agent Claude Code projects.**
 
-## What this generates
+Generates a fresh multi-agent project pre-wired with the
+[governance-core](https://github.com/napheir/governance-core) package —
+safety hooks, proposal workflow, wrap-up discipline, constitution iteration,
+cross-clone sync.
 
-```
-~/workshop-claude/<project_name>/
-  ├── agent-core/         (master, governance-core injected via pip)
-  ├── agent-<business>/   (one per agent in cookiecutter agents list)
-  ├── .governance/        (config.json + clauses/, installed by governance-core)
-  └── ...
-~/workshop-claude/shared_state/<project_name>/
-  └── proposals/ knowledge/ ... (cross-clone shared runtime state, not in any git)
-```
+## One-line bootstrap
 
-The default agents list is `[core, data]` — business agents like `rules` /
-`trade` / `research` are **not** preset to avoid polluting new project
-namespaces. Add via `--agents core,data,foo,bar` at bootstrap time.
+```bash
+# One-time setup (per machine)
+pip install cookiecutter
+pip install governance-core
+pip install multi-agent-bootstrap
 
-## Usage (Phase 3 will provide)
+# Bootstrap a new project
+multi-agent-bootstrap new my-project \
+    --agents core,data \
+    --ritual-phrase "Acknowledged"
 
-```pwsh
-multi-agent-bootstrap new my-new-project
-  # ? project_name: my-new-project
-  # ? agents: [core, data]
-  # ? ritual_phrase: 收到
-  # ? install_root: ~/workshop-claude
+# Open in Claude Code
+cd ~/workshop-claude/my-project/agent-core
+claude
 ```
 
-## Companion package
+Output:
 
-This template + `governance-core` pip package form a two-piece distribution:
+```
+~/workshop-claude/my-project/
+├── agent-core/                 (master branch; governance role)
+│   ├── .claude/                (50+ hooks/skills/commands/agents)
+│   ├── .governance/            (config.json + 17 clauses + keywords)
+│   ├── CLAUDE.md               (project constitution — business clauses
+│                                inherit governance clauses)
+│   ├── constitution/           (total.md + per-agent agent.md)
+│   ├── contracts/              (proposal/knowledge schemas)
+│   ├── knowledge/              (governance docs + your project docs)
+│   ├── tools/                  (31 generic governance tools)
+│   └── agent_rules/            (scope allow/deny)
+├── agent-data/                 (feature/data branch)
+└── ...
+~/workshop-claude/shared_state/my-project/
+└── proposals/                  (cross-clone shared runtime state)
+```
 
-- Template: project skeleton (this repo)
-- Package: governance implementation layer (`governance-core` pip)
+See [docs/getting-started.md](docs/getting-started.md) for the complete
+walkthrough.
 
-The template's `cookiecutter.json` is intentionally **not** version-pinned to
-`governance-core` — downstream projects `pip install --upgrade` independently.
+## CLI reference
+
+```
+multi-agent-bootstrap new <project_name> [options]
+
+Options:
+    --agents=NAMES            Comma-separated agent list (default: core,data)
+    --ritual-phrase=PHRASE    First-line session ritual (default: Acknowledged)
+    --install-root=DIR        Output parent dir (default: ~/workshop-claude)
+    --core-agent-name=NAME    Governance agent name (default: core)
+    --no-bootstrap            Skip bootstrap script + governance-core install
+    --force                   Overwrite if project_name already exists
+```
+
+## How it works
+
+1. **cookiecutter render**: The `{{cookiecutter.project_name}}/` directory
+   contains a skeleton with `{{ cookiecutter.* }}` placeholders. `mab/cli.py`
+   calls cookiecutter's Python API to substitute your inputs.
+2. **bootstrap script**: After rendering, `mab/cli.py` runs `git init` in
+   the new project + calls `governance-core install` (directly via Python
+   subprocess; avoids historical PowerShell JSON quoting issues).
+3. **governance-core install**: Renders 17 constitution clauses with your
+   ritual phrase substituted, copies 14 hooks + 7 commands + 22 skills + 2
+   agents to `.claude/`, writes 31 tools, sets up `.gitattributes`
+   `merge=ours` for per-branch `constitution/agent.md` isolation.
+4. **Initial commit**: `mab/cli.py` does `git add -A` + commits.
+
+Result: a complete multi-agent governance scaffold in ~5 seconds.
+
+## Customization
+
+After bootstrap, your project's `.governance/config.json` controls:
+
+- `project_name`, `install_root`, `shared_state_root`, `claude_dir`
+- `core_agent_name`, `core_branches`, `ritual_phrase`
+- `agents[]` with name/branch/clone_dir per agent
+- `upstream_branch`, `constitution_layout`
+
+To add a new business agent later, edit `agents[]` + run
+`governance-core upgrade --project-root .` to refresh.
+
+## Project status
+
+**v0.1.0-alpha** (2026-05). API may break between minor versions.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Related
+
+- [governance-core](https://github.com/napheir/governance-core) — the
+  governance package this template installs
