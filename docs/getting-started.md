@@ -62,22 +62,44 @@ multi-agent-bootstrap new my-new-project \
     --install-root ~/workshop-claude
 ```
 
-What happens:
+What happens (N-clone scaffold, multi-agent-bootstrap 0.2.0+):
 
-1. **Cookiecutter renders** the skeleton to
-   `~/workshop-claude/my-new-project/` with `project_name`, agents,
-   ritual phrase, install root substituted into all template files.
-2. **bootstrap.{ps1,sh}** runs in the new directory:
-   - `git init` if not already a repo
-   - Calls `governance-core install --project-root <project>` which:
-     - Writes `.governance/config.json` with your overrides
-     - Copies hooks/skills/commands/agents/contracts/tools from
-       governance-core package to project's `.claude/` + `tools/` etc.
-     - Renders 17 clauses to `.governance/clauses/`
-     - Configures `.gitattributes` `merge=ours` for per-branch
-       `constitution/agent.md`
-   - Initial git commit on master branch
-3. **Output paths** displayed: where to `cd` + `claude` to start.
+1. **Cookiecutter renders** the skeleton into a temporary staging
+   directory, with `project_name`, agents, ritual phrase substituted.
+2. **governance-core install** runs once in staging:
+   - Writes `.governance/config.json` with your overrides
+   - Copies hooks/skills/commands/agents/contracts/tools to `.claude/` etc.
+   - Renders 17 clauses to `.governance/clauses/`
+   - Configures `.gitattributes` `merge=ours` for per-branch
+     `constitution/agent.md`
+3. **Staging is committed** (`git init` + initial commit on master).
+4. **N clones** — for each agent in `--agents`, the staging repo is
+   `git clone`d into `<project>/agent-<name>/`:
+   - The core agent's clone stays on `master`
+   - Each business agent's clone gets `git checkout -b feature/<name>`
+   - `git config merge.ours.driver true` is set per clone (so merging
+     master never clobbers that clone's own `constitution/agent.md`)
+5. **shared_state** initialized at `~/workshop-claude/shared_state/<project>/`
+   (outside all clones) with `proposals/_id_ledger.json` seed.
+6. **Staging deleted**; next-step hints printed.
+
+Result — a complete multi-agent topology:
+
+```
+~/workshop-claude/my-new-project/
+├── agent-core/        (master branch — governance role)
+├── agent-data/        (feature/data branch)
+└── ...                (one clone per --agents entry)
+~/workshop-claude/shared_state/my-new-project/
+├── proposals/_id_ledger.json
+└── knowledge/
+```
+
+**Flags**:
+- `--no-clones` — single-directory project only (the 0.1.x behavior, no
+  N-clone expansion); useful for small single-agent projects.
+- `--no-bootstrap` — render the skeleton only; skip governance-core install
+  and clone expansion.
 
 ## Verify the project
 
@@ -132,4 +154,4 @@ As of 2026-05-15 (v0.1.0 first public release):
   `new <project>` subcommand
 - ✅ [github.com/napheir/governance-core](https://github.com/napheir/governance-core) — public
 - ✅ [github.com/napheir/multi-agent-template](https://github.com/napheir/multi-agent-template) — public
-- ⏳ Multi-clone N-agent scaffold (cookiecutter post-gen hook) — planned for 0.2.0
+- ✅ Multi-clone N-agent scaffold (multi-agent-bootstrap 0.2.0) — `new` creates N independent git clones per agent
