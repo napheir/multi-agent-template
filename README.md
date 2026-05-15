@@ -42,9 +42,9 @@ Output:
 │   ├── tools/                  (31 generic governance tools)
 │   └── agent_rules/            (scope allow/deny)
 ├── agent-data/                 (feature/data branch)
+├── shared_state/               (per-project; outside all clones)
+│   └── proposals/              (cross-clone shared runtime state)
 └── ...
-~/workshop-claude/shared_state/my-project/
-└── proposals/                  (cross-clone shared runtime state)
 ```
 
 See [docs/getting-started.md](docs/getting-started.md) for the complete

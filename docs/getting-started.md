@@ -17,10 +17,10 @@ This template assumes all your multi-agent projects live under one root:
 ~/workshop-claude/                          (Windows: C:\Users\<username>\workshop-claude\)
   ├── governance-core/                      (cloned once, shared across all projects)
   ├── multi-agent-template/                 (cloned once, source of bootstrap CLI)
-  ├── shared_state/                         (auto-created; cross-clone runtime state)
   └── <my-project>/                         (your projects, one dir each)
       ├── agent-core/                       (master branch; governance role)
       ├── agent-<business>/                 (one per agent in cookiecutter list)
+      ├── shared_state/                     (per-project; cross-clone runtime state)
       └── ...
 ```
 
@@ -79,7 +79,7 @@ What happens (N-clone scaffold, multi-agent-bootstrap 0.2.0+):
    - Each business agent's clone gets `git checkout -b feature/<name>`
    - `git config merge.ours.driver true` is set per clone (so merging
      master never clobbers that clone's own `constitution/agent.md`)
-5. **shared_state** initialized at `~/workshop-claude/shared_state/<project>/`
+5. **shared_state** initialized at `~/workshop-claude/<project>/shared_state/`
    (outside all clones) with `proposals/_id_ledger.json` seed.
 6. **Staging deleted**; next-step hints printed.
 
@@ -87,12 +87,12 @@ Result — a complete multi-agent topology:
 
 ```
 ~/workshop-claude/my-new-project/
-├── agent-core/        (master branch — governance role)
-├── agent-data/        (feature/data branch)
-└── ...                (one clone per --agents entry)
-~/workshop-claude/shared_state/my-new-project/
-├── proposals/_id_ledger.json
-└── knowledge/
+├── agent-core/         (master branch — governance role)
+├── agent-data/         (feature/data branch)
+├── shared_state/       (per-project; outside all clones)
+│   ├── proposals/_id_ledger.json
+│   └── knowledge/
+└── ...                 (one clone per --agents entry)
 ```
 
 **Flags**:
