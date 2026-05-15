@@ -17,3 +17,7 @@ __pycache__/
 # Local
 .local/
 *.egg-info/
+
+# Python build artifacts
+dist/
+build/
